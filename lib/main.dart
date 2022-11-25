@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pixelfield/auth/auth_repository.dart';
 import 'package:pixelfield/sign_in.dart';
 import 'constants.dart';
 import 'package:bloc/bloc.dart';
 import 'myblockobserver.dart';
 
 void main() {
+
   Bloc.observer = MyBlocObserver();
+
+  //during this app i used many widget like Flexible ,
+  // Spacer and Align,I prefered in this way in order
+  //to make the app responsive as more as i can, in some case i used
+  //padding or i gave a certain width height to an Container, in those
+  //cases i used Mediaquery
   runApp(const MyApp());
 }
 
@@ -18,6 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home:  MyHomePage(),
     );
   }
@@ -35,6 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //i used MediaQuery because is a good tool to make the display responsive
+    //with that you can calculate very easy the positions of the objects on the screen
+
     size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -48,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          // backgroundColor: backgroundcolor,
+
           body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

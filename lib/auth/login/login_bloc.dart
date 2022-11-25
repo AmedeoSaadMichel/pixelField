@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pixelfield/auth/login/login_event.dart';
 import 'package:pixelfield/auth/login/login_state.dart';
@@ -27,14 +26,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit.call(state.copyWith(formStatus: FormSubmitting()));
 
       try {
-        await authRepo.login();
-        emit.call( state.copyWith(formStatus: SubmissionSuccess()));
+        await authRepo.login(state.email,state.password);
+        emit.call( state.copyWith(formStatus: SubmissionSuccess('Logged in')));
       } catch (e) {
         emit.call( state.copyWith(formStatus: SubmissionFailed(e)));
       }
     }
   }
-/*  Stream<LoginState> mapEventToState(LoginEvent event) async* {
 
-  }*/
 }

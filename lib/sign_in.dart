@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pixelfield/auth/auth_repository.dart';
 import 'package:pixelfield/auth/form_submission_status.dart';
 import 'package:pixelfield/auth/login/login_bloc.dart';
 import 'package:pixelfield/auth/login/login_event.dart';
 import 'package:pixelfield/auth/login/login_state.dart';
-import 'package:pixelfield/jsonClasses/accounts.dart';
 import 'constants.dart';
 
 class Signin extends StatefulWidget {
@@ -20,29 +16,19 @@ class Signin extends StatefulWidget {
 
 class _SigninState extends State<Signin> {
   var size, height, width;
-  List<dynamic> accountsList = [];
+
 
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   bool _passwordVisible = false;
 
-  Future<void> readJson() async {
-    final String response = await rootBundle.loadString('assets/accounts.json');
-    final data = await jsonDecode(response);
 
-    setState(() {
-      accountsList =
-          data['accounts'].map((data) => Account.fromJson(data)).toList();
-    });
-  }
 
   @override
   void initState() {
     super.initState();
     _passwordVisible = false;
-    readJson();
   }
 
   @override
@@ -120,48 +106,61 @@ class _SigninState extends State<Signin> {
     );
   }
 
-//I SPLIT THE CODE IN VARIOUS WIDGET IN ORDER TO MAKES UNDERSTANDBLE THE READING
+//I SPLIT THE CODE IN VARIOUS WIDGET IN ORDER TO MAKES UNDERSTANDABLE THE READING
   Widget _signForm() {
-    return Flexible(
-        flex: 20,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              //Email
-              _emailField(),
-              Spacer(),
-              //Password
-              _passwordField(),
-              Spacer(
-                flex: 2,
-              ),
-              _loginButton(),
-              Spacer(
-                flex: 2,
-              ),
-              //cant sign in , recover password
-              Flexible(
-                  flex: 10,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        "Can't sign in?",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      Text("Recover Password",
-                          style: TextStyle(
-                              color: c_yellow2,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold))
-                    ],
-                  ))
-            ],
-          ),
-        ));
+    //BLOCK LISTENER TO DISPLAY THE ERROR
+    return BlocListener<LoginBloc,LoginState>(
+      listener: (context,state){
+        final formStatus = state.formStatus;
+        if (formStatus is SubmissionFailed) {
+          _showSnackBar(context, formStatus.exception.toString());
+        }
+        if (formStatus is SubmissionSuccess) {
+          _showSnackBar(context, formStatus.result);
+        }
+      },
+      child: Flexible(
+          flex: 20,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                //Email
+                _emailField(),
+                Spacer(),
+                //Password
+                _passwordField(),
+                Spacer(
+                  flex: 2,
+                ),
+                _loginButton(),
+                Spacer(
+                  flex: 2,
+                ),
+                //cant sign in , recover password
+                Flexible(
+                    flex: 10,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          "Can't sign in?",
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        Text("Recover Password",
+                            style: TextStyle(
+                                color: c_yellow2,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold))
+                      ],
+                    ))
+              ],
+            ),
+          )),
+    );
   }
 
+  //EMAIL WIDGET
   Widget _emailField() {
     return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
       return Flexible(
@@ -195,12 +194,6 @@ class _SigninState extends State<Signin> {
             ),
             style: TextStyle(color: Colors.white),
             validator: (value) => state.isValidEmail ? null : 'Invalid Email',
-            /*{
-             if (value!.isEmpty || !value.contains('@')) {
-               return 'invalid Email';
-             }
-             return null;
-                },*/
             //passing values to the bloc
             onChanged: (value) =>
                 context.read<LoginBloc>().add(LoginEmailChanged(email: value)),
@@ -209,7 +202,7 @@ class _SigninState extends State<Signin> {
       );
     });
   }
-
+ //PASSWORD WIDGET
   Widget _passwordField() {
     return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
       return Flexible(
@@ -264,7 +257,7 @@ class _SigninState extends State<Signin> {
       );
     });
   }
-
+ //LOGIN WIDGET
   Widget _loginButton() {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
@@ -305,5 +298,10 @@ class _SigninState extends State<Signin> {
               );
       },
     );
+  }
+  //DISPLAY ERROR
+  void _showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

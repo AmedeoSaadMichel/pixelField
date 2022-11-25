@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-
+//this class is recomended by the library in order to debug very easy
 class MyBlocObserver extends BlocObserver {
   @override
   void onCreate(BlocBase bloc) {
